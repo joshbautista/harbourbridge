@@ -76,10 +76,7 @@ func (isi InfoSchemaImpl) GetToDdl() common.ToDdl {
 
 // GetTableName returns table name.
 func (isi InfoSchemaImpl) GetTableName(schema string, tableName string) string {
-	if schema == "public" { // Drop 'public' prefix.
-		return tableName
-	}
-	return fmt.Sprintf("%s.%s", schema, tableName)
+	return tableName
 }
 
 // GetRowsFromTable returns a sql Rows object for a table.
@@ -124,6 +121,11 @@ func (isi InfoSchemaImpl) ProcessData(conv *internal.Conv, tableId string, srcSc
 	rows := rowsInterface.(*sql.Rows)
 	defer rows.Close()
 	srcCols, _ := rows.Columns()
+	for idx, _ := range srcCols {
+		if srcCols[idx] == "user" {
+			srcCols[idx] = "\"user\""
+		}
+	}
 	v, iv := buildVals(len(srcCols))
 	colNameIdMap := internal.GetSrcColNameIdMap(conv.SrcSchema[tableId])
 	for rows.Next() {
